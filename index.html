@@ -112,18 +112,23 @@
         }
 
         function submitResults() {
+            const username = document.getElementById('username').value; // Get username
+            const timeTaken = "10 seconds"; // Replace with actual time logic
+            const finalAnswer = "Rv wic logo"; // Replace with actual answer logic
+            
             document.getElementById('finalScore').value = score;
-            document.getElementById('finalTime').value = "10 seconds"; // Replace with actual time logic
-            document.getElementById('finalAnswer').value = "Rv wic logo"; // Replace with actual answer logic
+            document.getElementById('finalTime').value = timeTaken;
+            document.getElementById('finalAnswer').value = finalAnswer;
 
             const email = new URLSearchParams(window.location.search).get('email');
 
-            fetch('https://script.google.com/macros/s/AKfycbzkjrWWJlbMOEVVKEHswFsGetrSHyIdeBlsui0OzgCp0o3Owh02Hwjw0q4sFhR_BAbc/exec', {
+            fetch('https://script.google.com/macros/s/AKfycby5pM0yisI-OhAhuuJyMmer5K5kzb2l9clvdo4xacb0R-8QF1KE4XDrvwiHYSNGJDuV/exec', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: new URLSearchParams({
+                    'username': username, // Send username
                     'email': email,
                     'score': document.getElementById('finalScore').value,
                     'time': document.getElementById('finalTime').value,
