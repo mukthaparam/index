@@ -33,38 +33,6 @@
             margin-bottom: 20px;
         }
 
-        h2 {
-            margin-bottom: 20px;
-        }
-
-        .blurred {
-            filter: blur(10px);
-            transition: filter 0.5s;
-            display: block;
-            margin: 0 auto;
-        }
-
-        #timer {
-            font-size: 20px;
-            color: red;
-            margin: 10px 0;
-        }
-
-        #revealImage {
-            width: 300px;
-            height: auto;
-            max-width: 100%;
-            filter: blur(10px);
-            transition: filter 0.5s;
-            margin: 20px auto;
-        }
-
-        #nameInput,
-        #finalAnswerInput {
-            display: none;
-            margin-bottom: 20px;
-        }
-
         button {
             background-color: #2196F3;
             color: white;
@@ -89,40 +57,21 @@
             margin-bottom: 20px;
             font-size: 16px;
         }
-
-        #result {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .top-image {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: auto;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="https://raw.githubusercontent.com/mukthaparam/index/main/12.jpg" class="top-image" alt="Top Image">
         <h1>Quiz App</h1>
-        <div id="nameInput">
-            <input type="text" id="username" placeholder="Enter your name" required>
-            <button id="startButton">Start Quiz</button>
-        </div>
-        <div id="timer"></div>
+        <input type="text" id="username" placeholder="Enter your name" required>
+        <button id="startButton">Start Quiz</button>
+        
         <div id="quiz"></div>
-        <div id="feedback"></div>
-        <img id="revealImage" src="https://raw.githubusercontent.com/mukthaparam/index/main/dark-theme.png" class="blurred" alt="Reveal Image">
-        <div id="finalAnswerInput">
-            <h2>Guess it!</h2>
-            <input type="text" id="finalAnswer" placeholder="Enter your final answer" required>
-            <button id="submitFinalAnswer">Submit Final Answer</button>
-        </div>
         <div id="result"></div>
+        
+        <!-- Hidden fields for data submission -->
+        <input type="hidden" id="finalScore">
+        <input type="hidden" id="finalTime">
+        <input type="hidden" id="finalAnswer">
     </div>
 
     <script>
@@ -136,27 +85,9 @@
         let currentQuestion = 0;
         let score = 0;
         const quizDiv = document.getElementById('quiz');
-        const feedbackDiv = document.getElementById('feedback');
-        const revealImage = document.getElementById('revealImage');
-        const timerDiv = document.getElementById('timer');
-        const nameInputDiv = document.getElementById('nameInput');
-        const usernameInput = document.getElementById('username');
-        const finalAnswerInput = document.getElementById('finalAnswerInput');
-        const finalAnswer = document.getElementById('finalAnswer');
-        const resultDiv = document.getElementById('result');
-        let timer;
-
-        nameInputDiv.style.display = 'block';
 
         document.getElementById('startButton').onclick = function() {
-            const username = usernameInput.value.trim();
-            if (username) {
-                alert(`Welcome, ${username}!`);
-                nameInputDiv.style.display = 'none';
-                displayQuestion();
-            } else {
-                alert('Please enter your name.');
-            }
+            displayQuestion();
         };
 
         function displayQuestion() {
@@ -167,109 +98,48 @@
                     quizDiv.innerHTML += `<button onclick="checkAnswer(${index})">${answer}</button>`;
                 });
             } else {
-                quizDiv.style.display = "none";
-                finalAnswerInput.style.display = "block";
-                revealImage.style.display = "block";
-                feedbackDiv.innerText = "";
+                submitResults();
             }
-
-            startTimer(10);
-        }
-
-        function startTimer(seconds) {
-            let timeLeft = seconds;
-            timerDiv.innerText = `Time left: ${timeLeft} seconds`;
-            timer = setInterval(() => {
-                timeLeft--;
-                timerDiv.innerText = `Time left: ${timeLeft} seconds`;
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    feedbackDiv.innerText = "Time's up!";
-                    disableButtons();
-                    currentQuestion++;
-                    displayQuestion();
-                }
-            }, 1000);
-        }
-
-        function disableButtons() {
-            const buttons = quizDiv.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.disabled = true;
-            });
         }
 
         function checkAnswer(selected) {
-            clearInterval(timer);
             const question = questions[currentQuestion];
             if (selected === question.correct) {
                 score++;
-                feedbackDiv.innerText = "Correct!";
-                
-                switch (score) {
-                    case 1:
-                        revealImage.style.filter = "blur(7.5px)";
-                        break;
-                    case 2:
-                        revealImage.style.filter = "blur(5px)";
-                        break;
-                    case 3:
-                        revealImage.style.filter = "blur(2.5px)";
-                        break;
-                    case 4:
-                        revealImage.style.filter = "blur(0px)";
-                        break;
-                }
-            } else {
-                feedbackDiv.innerText = "Incorrect!";
             }
-
             currentQuestion++;
-            if (currentQuestion < questions.length) {
-                displayQuestion();
-            } else {
-                quizDiv.style.display = "none";
-                finalAnswerInput.style.display = "block";
-                revealImage.style.display = "block";
-                feedbackDiv.innerText = "";
-            }
+            displayQuestion();
         }
 
-        document.getElementById('submitFinalAnswer').onclick = function() {
-            const userFinalAnswer = finalAnswer.value.trim();
-            const username = usernameInput.value.trim(); // Get the username
-            const scoreValue = score; // Get the score
-            const timeTaken = 10; // Replace with actual time taken if applicable
+        function submitResults() {
+            document.getElementById('finalScore').value = score;
+            document.getElementById('finalTime').value = "30 seconds"; // Replace with actual time logic
+            document.getElementById('finalAnswer').value = "Your Answer"; // Replace with actual answer logic
 
-            // Prepare data to send to Google Sheets
-            const data = {
-                username: username,
-                score: scoreValue,
-                time: timeTaken,
-                finalAnswer: userFinalAnswer
-            };
+            const email = new URLSearchParams(window.location.search).get('email');
 
-            // Send data to Google Apps Script
-            fetch('https://script.google.com/macros/s/AKfycbzeyUETOGGG1Dmy7IFJ0U15dFgD_IdykCMTRMP7hpjHQGGuCOTwDOrWNuj6Gyu6tBPO/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbzkjrWWJlbMOEVVKEHswFsGetrSHyIdeBlsui0OzgCp0o3Owh02Hwjw0q4sFhR_BAbc/exec', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(data) // Convert object to URL encoded format
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'email': email,
+                    'score': document.getElementById('finalScore').value,
+                    'time': document.getElementById('finalTime').value,
+                    'finalAnswer': document.getElementById('finalAnswer').value
+                })
             })
             .then(response => response.json())
-            .then(result => {
-                if (result.result === 'success') {
-                    resultDiv.innerText = "Your answer is correct. Thank you!";
-                } else {
-                    resultDiv.innerText = "Error saving data.";
-                }
+            .then(data => {
+                console.log('Success:', data);
+                document.getElementById('result').innerText = "Results submitted successfully!";
             })
-            .catch(error => console.error('Error!', error.message));
-
-            // Hide elements after submission
-            finalAnswerInput.style.display = "none";
-            quizDiv.style.display = "none";
-            revealImage.style.display = "none";
-        };
+            .catch((error) => {
+                console.error('Error:', error);
+                document.getElementById('result').innerText = "Error submitting results.";
+            });
+        }
     </script>
 </body>
 </html>
