@@ -33,6 +33,38 @@
             margin-bottom: 20px;
         }
 
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .blurred {
+            filter: blur(10px);
+            transition: filter 0.5s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #timer {
+            font-size: 20px;
+            color: red;
+            margin: 10px 0;
+        }
+
+        #revealImage {
+            width: 300px;
+            height: auto;
+            max-width: 100%;
+            filter: blur(10px);
+            transition: filter 0.5s;
+            margin: 20px auto;
+        }
+
+        #nameInput,
+        #finalAnswerInput {
+            display: none;
+            margin-bottom: 20px;
+        }
+
         button {
             background-color: #2196F3;
             color: white;
@@ -57,21 +89,46 @@
             margin-bottom: 20px;
             font-size: 16px;
         }
+
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .top-image {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <img src="https://raw.githubusercontent.com/mukthaparam/index/main/12.jpg" class="top-image" alt="Top Image">
         <h1>Quiz App</h1>
-        <input type="text" id="username" placeholder="Enter your name" required>
-        <button id="startButton">Start Quiz</button>
-        
+        <div id="nameInput">
+            <input type="text" id="username" placeholder="Enter your name" required>
+            <button id="startButton">Start Quiz</button>
+        </div>
+        <div id="timer"></div>
         <div id="quiz"></div>
+        <div id="feedback"></div>
+        <img id="revealImage" src="https://raw.githubusercontent.com/mukthaparam/index/main/dark-theme.png" class="blurred" alt="Reveal Image">
+        <div id="finalAnswerInput">
+            <h2>Guess it!</h2>
+            <input type="text" id="finalAnswer" placeholder="Enter your final answer" required>
+            <button id="submitFinalAnswer">Submit Final Answer</button>
+        </div>
         <div id="result"></div>
-        
-        <!-- Hidden fields for data submission -->
-        <input type="hidden" id="finalScore">
-        <input type="hidden" id="finalTime">
-        <input type="hidden" id="finalAnswer">
+
+        <!-- Google Sheets Form -->
+        <form name="submit-to-google-sheet">
+            <input name="email" type="email" placeholder="Email" required>
+            <button type="submit">Send</button>
+        </form>
     </div>
 
     <script>
@@ -84,10 +141,29 @@
 
         let currentQuestion = 0;
         let score = 0;
+        let totalTime = 0; // Track total time taken
         const quizDiv = document.getElementById('quiz');
+        const feedbackDiv = document.getElementById('feedback');
+        const revealImage = document.getElementById('revealImage');
+        const timerDiv = document.getElementById('timer');
+        const nameInputDiv = document.getElementById('nameInput');
+        const usernameInput = document.getElementById('username');
+        const finalAnswerInput = document.getElementById('finalAnswerInput');
+        const finalAnswer = document.getElementById('finalAnswer');
+        const resultDiv = document.getElementById('result');
+        let timer;
+
+        nameInputDiv.style.display = 'block';
 
         document.getElementById('startButton').onclick = function() {
-            displayQuestion();
+            const username = usernameInput.value.trim();
+            if (username) {
+                alert(`Welcome, ${username}!`);
+                nameInputDiv.style.display = 'none';
+                displayQuestion();
+            } else {
+                alert('Please enter your name.');
+            }
         };
 
         function displayQuestion() {
@@ -98,53 +174,110 @@
                     quizDiv.innerHTML += `<button onclick="checkAnswer(${index})">${answer}</button>`;
                 });
             } else {
-                submitResults();
+                quizDiv.style.display = "none";
+                finalAnswerInput.style.display = "block";
+                revealImage.style.display = "block";
+                feedbackDiv.innerText = "";
             }
+
+            startTimer(10);
+        }
+
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            timerDiv.innerText = `Time left: ${timeLeft} seconds`;
+            timer = setInterval(() => {
+                timeLeft--;
+                totalTime++; // Increment total time taken
+                timerDiv.innerText = `Time left: ${timeLeft} seconds`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    feedbackDiv.innerText = "Time's up!";
+                    disableButtons();
+                    currentQuestion++;
+                    displayQuestion();
+                }
+            }, 1000);
+        }
+
+        function disableButtons() {
+            const buttons = quizDiv.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.disabled = true;
+            });
         }
 
         function checkAnswer(selected) {
+            clearInterval(timer);
             const question = questions[currentQuestion];
             if (selected === question.correct) {
                 score++;
+                feedbackDiv.innerText = "Correct!";
+                
+                switch (score) {
+                    case 1:
+                        revealImage.style.filter = "blur(7.5px)";
+                        break;
+                    case 2:
+                        revealImage.style.filter = "blur(5px)";
+                        break;
+                    case 3:
+                        revealImage.style.filter = "blur(2.5px)";
+                        break;
+                    case 4:
+                        revealImage.style.filter = "blur(0px)";
+                        break;
+                }
+            } else {
+                feedbackDiv.innerText = "Incorrect!";
             }
+
             currentQuestion++;
-            displayQuestion();
+            if (currentQuestion < questions.length) {
+                displayQuestion();
+            } else {
+                quizDiv.style.display = "none";
+                finalAnswerInput.style.display = "block";
+                revealImage.style.display = "block";
+                feedbackDiv.innerText = "";
+            }
         }
 
-        function submitResults() {
-            const username = document.getElementById('username').value; // Get username
-            const timeTaken = "10 seconds"; // Replace with actual time logic
-            const finalAnswer = "Rv wic logo"; // Replace with actual answer logic
-            
-            document.getElementById('finalScore').value = score;
-            document.getElementById('finalTime').value = timeTaken;
-            document.getElementById('finalAnswer').value = finalAnswer;
+        document.getElementById('submitFinalAnswer').onclick = function() {
+            const userFinalAnswer = finalAnswer.value.trim();
+            const username = usernameInput.value.trim();
+            let finalResult = "";
 
-            const email = new URLSearchParams(window.location.search).get('email');
+            if (userFinalAnswer.toLowerCase() === "rv wic logo") {
+                finalResult = "Your answer is correct. Thank you!";
+            } else {
+                finalResult = "Your answer is incorrect. Thank you for participating!";
+            }
 
-            fetch('https://script.google.com/macros/s/AKfycby5pM0yisI-OhAhuuJyMmer5K5kzb2l9clvdo4xacb0R-8QF1KE4XDrvwiHYSNGJDuV/exec', {
+            resultDiv.innerText = finalResult;
+
+            // Prepare data for Google Sheets
+            const formData = new FormData(document.forms['submit-to-google-sheet']);
+            formData.append('username', username);
+            formData.append('score', score);
+            formData.append('time', totalTime);
+            formData.append('finalAnswer', userFinalAnswer);
+
+            // Submit to Google Sheets
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx61X40sORqZq2jqf4m1NIY5d3GXoKjP2k1nOtbIHqzKeNQG0_LG8sho-Gz5n-O73Xk/exec'; // Replace with your Google Apps Script URL
+            fetch(scriptURL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    'username': username, // Send username
-                    'email': email,
-                    'score': document.getElementById('finalScore').value,
-                    'time': document.getElementById('finalTime').value,
-                    'finalAnswer': document.getElementById('finalAnswer').value
-                })
+                body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                document.getElementById('result').innerText = "Results submitted successfully!";
+            .then(response => {
+                if (response.ok) {
+                    alert('Form submitted successfully!');
+                } else {
+                    alert('Error submitting the form.');
+                }
             })
-            .catch((error) => {
-                console.error('Error:', error);
-                document.getElementById('result').innerText = "Error submitting results.";
-            });
-        }
+            .catch(error => console.error('Error!', error.message));
+        };
     </script>
 </body>
 </html>
