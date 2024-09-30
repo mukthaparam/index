@@ -6,32 +6,42 @@
     <title>Quiz App</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Times New Roman', Times, serif;
             background-color: #000; /* Black background */
             color: #fff; /* White text */
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
         .container {
             text-align: center;
             background-color: #0d47a1; /* Darker blue for quiz part */
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            margin: 0 auto;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 30px;
             max-width: 600px;
+            margin: 20px;
         }
 
         h1 {
-            color: #fff; /* White text for heading */
+            color: #fff;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
         }
 
         .blurred {
             filter: blur(10px);
             transition: filter 0.5s;
-            display: block; /* Ensures the image behaves like a block element */
-            margin: 0 auto; /* Centers the image */
+            display: block;
+            margin: 0 auto;
         }
 
         #timer {
@@ -46,7 +56,7 @@
             max-width: 100%;
             filter: blur(10px);
             transition: filter 0.5s;
-            margin: 20px auto; /* Centers the image */
+            margin: 20px auto;
         }
 
         #nameInput,
@@ -56,17 +66,28 @@
         }
 
         button {
-            background-color: #2196F3; /* Blue */
+            background-color: #2196F3;
             color: white;
             border: none;
             border-radius: 5px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
         button:hover {
-            background-color: #1E88E5; /* Darker blue for hover effect */
+            background-color: #1E88E5;
+            transform: scale(1.05);
+        }
+
+        input[type="text"], input[type="email"] {
+            padding: 10px;
+            width: 80%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            font-size: 16px;
         }
 
         #result {
@@ -79,7 +100,7 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 50px; /* Adjust size as needed */
+            width: 50px;
             height: auto;
         }
     </style>
@@ -97,11 +118,19 @@
         <div id="feedback"></div>
         <img id="revealImage" src="https://raw.githubusercontent.com/mukthaparam/index/main/dark-theme.png" class="blurred" alt="Reveal Image">
         <div id="finalAnswerInput">
+            <h2>Guess it!</h2>
             <input type="text" id="finalAnswer" placeholder="Enter your final answer" required>
             <button id="submitFinalAnswer">Submit Final Answer</button>
         </div>
         <div id="result"></div>
+
+        <!-- Google Sheets Form -->
+        <form name="submit-to-google-sheet">
+            <input name="email" type="email" placeholder="Email" required>
+            <button type="submit">Send</button>
+        </form>
     </div>
+
     <script>
         const questions = [
             { question: "What is 2 + 2?", answers: ["3", "4", "5"], correct: 1 },
@@ -112,6 +141,7 @@
 
         let currentQuestion = 0;
         let score = 0;
+        let totalTime = 0; // Track total time taken
         const quizDiv = document.getElementById('quiz');
         const feedbackDiv = document.getElementById('feedback');
         const revealImage = document.getElementById('revealImage');
@@ -123,10 +153,8 @@
         const resultDiv = document.getElementById('result');
         let timer;
 
-        // Show name input at the start
         nameInputDiv.style.display = 'block';
 
-        // Start quiz when the user enters their name
         document.getElementById('startButton').onclick = function() {
             const username = usernameInput.value.trim();
             if (username) {
@@ -146,7 +174,6 @@
                     quizDiv.innerHTML += `<button onclick="checkAnswer(${index})">${answer}</button>`;
                 });
             } else {
-                // Move to the "Guess it" question
                 quizDiv.style.display = "none";
                 finalAnswerInput.style.display = "block";
                 revealImage.style.display = "block";
@@ -161,6 +188,7 @@
             timerDiv.innerText = `Time left: ${timeLeft} seconds`;
             timer = setInterval(() => {
                 timeLeft--;
+                totalTime++; // Increment total time taken
                 timerDiv.innerText = `Time left: ${timeLeft} seconds`;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
@@ -186,7 +214,6 @@
                 score++;
                 feedbackDiv.innerText = "Correct!";
                 
-                // Update blur effect based on score
                 switch (score) {
                     case 1:
                         revealImage.style.filter = "blur(7.5px)";
@@ -218,14 +245,38 @@
 
         document.getElementById('submitFinalAnswer').onclick = function() {
             const userFinalAnswer = finalAnswer.value.trim();
+            const username = usernameInput.value.trim();
+            let finalResult = "";
+
             if (userFinalAnswer.toLowerCase() === "rv wic logo") {
-                resultDiv.innerText = "Your answer is correct. Thank you!";
+                finalResult = "Your answer is correct. Thank you!";
             } else {
-                resultDiv.innerText = "Your answer is incorrect. Thank you for participating!";
+                finalResult = "Your answer is incorrect. Thank you for participating!";
             }
-            finalAnswerInput.style.display = "none";
-            quizDiv.style.display = "none";
-            revealImage.style.display = "none";
+
+            resultDiv.innerText = finalResult;
+
+            // Prepare data for Google Sheets
+            const formData = new FormData(document.forms['submit-to-google-sheet']);
+            formData.append('username', username);
+            formData.append('score', score);
+            formData.append('time', totalTime);
+            formData.append('finalAnswer', userFinalAnswer);
+
+            // Submit to Google Sheets
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx61X40sORqZq2jqf4m1NIY5d3GXoKjP2k1nOtbIHqzKeNQG0_LG8sho-Gz5n-O73Xk/exec'; // Replace with your Google Apps Script URL
+            fetch(scriptURL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Form submitted successfully!');
+                } else {
+                    alert('Error submitting the form.');
+                }
+            })
+            .catch(error => console.error('Error!', error.message));
         };
     </script>
 </body>
