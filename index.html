@@ -258,12 +258,19 @@
             formData.append('finalAnswer', userFinalAnswer);
 
             // Submit to Google Sheets
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbx61X40sORqZq2jqf4m1NIY5d3GXoKjP2k1nOtbIHqzKeNQG0_LG8sho-Gz5n-O73Xk/exec'; // Replace with your Google Apps Script URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbwIpapneViQJf-Lq4xafLqej0wLicGQfOs7h4bZbWns9amhnMzJNwwJUhyR0i0z_Feu/exec'; // Replace with your Google Apps Script Web App URL
             fetch(scriptURL, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => console.log('Success!', response))
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('Success:', data.message);
+                } else {
+                    console.error('Error:', data.message);
+                }
+            })
             .catch(error => console.error('Error!', error.message));
         };
     </script>
