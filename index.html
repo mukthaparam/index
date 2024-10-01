@@ -152,7 +152,7 @@
         document.getElementById('startButton').onclick = function() {
             const username = usernameInput.value.trim();
             if (username) {
-                alert(Welcome, ${username}!);
+                alert(`Welcome, ${username}!`); // Fixed template literal
                 nameInputDiv.style.display = 'none';
                 displayQuestion();
             } else {
@@ -163,9 +163,9 @@
         function displayQuestion() {
             if (currentQuestion < questions.length) {
                 const question = questions[currentQuestion];
-                quizDiv.innerHTML = <h2>${question.question}</h2>;
+                quizDiv.innerHTML = `<h2>${question.question}</h2>`;
                 question.answers.forEach((answer, index) => {
-                    quizDiv.innerHTML += <button onclick="checkAnswer(${index})">${answer}</button>;
+                    quizDiv.innerHTML += `<button onclick="checkAnswer(${index})">${answer}</button>`;
                 });
             } else {
                 quizDiv.style.display = "none";
@@ -179,11 +179,11 @@
 
         function startTimer(seconds) {
             let timeLeft = seconds;
-            timerDiv.innerText = Time left: ${timeLeft} seconds;
+            timerDiv.innerText = `Time left: ${timeLeft} seconds`;
             timer = setInterval(() => {
                 timeLeft--;
                 totalTime++; // Increment total time taken
-                timerDiv.innerText = Time left: ${timeLeft} seconds;
+                timerDiv.innerText = `Time left: ${timeLeft} seconds`;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     feedbackDiv.innerText = "Time's up!";
@@ -258,13 +258,20 @@
             formData.append('finalAnswer', userFinalAnswer);
 
             // Submit to Google Sheets
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbx61X40sORqZq2jqf4m1NIY5d3GXoKjP2k1nOtbIHqzKeNQG0_LG8sho-Gz5n-O73Xk/exec'; // Replace with your Google Apps Script URL
+            const scriptURL = 'YOUR_SCRIPT_URL'; // Replace with your Google Apps Script URL
             fetch(scriptURL, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => console.log('Success!', response))
-            .catch(error => console.error('Error!', error.message));
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success!', data);
+                alert('Data submitted successfully!'); // Notify user of success
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert('An error occurred while submitting your data.'); // Notify user of error
+            });
         };
     </script>
 </body>
