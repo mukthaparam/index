@@ -81,7 +81,7 @@
             transform: scale(1.05);
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="email"] {
             padding: 10px;
             width: 80%;
             border-radius: 5px;
@@ -123,6 +123,12 @@
             <button id="submitFinalAnswer">Submit Final Answer</button>
         </div>
         <div id="result"></div>
+
+        <!-- Google Sheets Form -->
+        <form name="submit-to-google-sheet">
+            <input name="email" type="email" placeholder="Email" required>
+            <button type="submit">Send</button>
+        </form>
     </div>
 
     <script>
@@ -251,19 +257,25 @@
             resultDiv.innerText = finalResult;
 
             // Prepare data for Google Sheets
-            const formData = new FormData();
+            const formData = new FormData(document.forms['submit-to-google-sheet']);
             formData.append('username', username);
             formData.append('score', score);
             formData.append('time', totalTime);
             formData.append('finalAnswer', userFinalAnswer);
 
             // Submit to Google Sheets
-            const scriptURL = 'https://script.google.com/a/macros/rvce.edu.in/s/AKfycbzQgcJ8ukwpa-ciH7wdmZ20unMVThzXuHsaAF0jAgqCTgk8sCl6NhgbvT_PjTZxZLufAA/exec'; // Replace with your Google Apps Script URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx61X40sORqZq2jqf4m1NIY5d3GXoKjP2k1nOtbIHqzKeNQG0_LG8sho-Gz5n-O73Xk/exec'; // Replace with your Google Apps Script URL
             fetch(scriptURL, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => console.log('Success!', response))
+            .then(response => {
+                if (response.ok) {
+                    alert('Form submitted successfully!');
+                } else {
+                    alert('Error submitting the form.');
+                }
+            })
             .catch(error => console.error('Error!', error.message));
         };
     </script>
