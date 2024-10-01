@@ -37,6 +37,13 @@
             margin-bottom: 20px;
         }
 
+        .blurred {
+            filter: blur(10px);
+            transition: filter 0.5s;
+            display: block;
+            margin: 0 auto;
+        }
+
         #timer {
             font-size: 20px;
             color: red;
@@ -88,10 +95,19 @@
             font-size: 24px;
             font-weight: bold;
         }
+
+        .top-image {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <img src="https://raw.githubusercontent.com/mukthaparam/index/main/12.jpg" class="top-image" alt="Top Image">
         <h1>Quiz App</h1>
         <div id="nameInput">
             <input type="text" id="username" placeholder="Enter your name" required>
@@ -136,7 +152,7 @@
         document.getElementById('startButton').onclick = function() {
             const username = usernameInput.value.trim();
             if (username) {
-                alert(`Welcome, ${username}!`);
+                alert(Welcome, ${username}!);
                 nameInputDiv.style.display = 'none';
                 displayQuestion();
             } else {
@@ -147,9 +163,9 @@
         function displayQuestion() {
             if (currentQuestion < questions.length) {
                 const question = questions[currentQuestion];
-                quizDiv.innerHTML = `<h2>${question.question}</h2>`;
+                quizDiv.innerHTML = <h2>${question.question}</h2>;
                 question.answers.forEach((answer, index) => {
-                    quizDiv.innerHTML += `<button onclick="checkAnswer(${index})">${answer}</button>`;
+                    quizDiv.innerHTML += <button onclick="checkAnswer(${index})">${answer}</button>;
                 });
             } else {
                 quizDiv.style.display = "none";
@@ -163,11 +179,11 @@
 
         function startTimer(seconds) {
             let timeLeft = seconds;
-            timerDiv.innerText = `Time left: ${timeLeft} seconds`;
+            timerDiv.innerText = Time left: ${timeLeft} seconds;
             timer = setInterval(() => {
                 timeLeft--;
                 totalTime++; // Increment total time taken
-                timerDiv.innerText = `Time left: ${timeLeft} seconds`;
+                timerDiv.innerText = Time left: ${timeLeft} seconds;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     feedbackDiv.innerText = "Time's up!";
@@ -191,6 +207,7 @@
             if (selected === question.correct) {
                 score++;
                 feedbackDiv.innerText = "Correct!";
+                
                 switch (score) {
                     case 1:
                         revealImage.style.filter = "blur(7.5px)";
@@ -241,19 +258,12 @@
             formData.append('finalAnswer', userFinalAnswer);
 
             // Submit to Google Sheets
-            const scriptURL = 'https://script.google.com/a/macros/rvce.edu.in/s/AKfycbzzMBn2cXl6XrjO8n8gHhtS3ArC3QPozTANodtHx_EtCKC5oYu1In-J57c2KBDfrVQc2g/exec'; // Replace with your Google Apps Script Web App URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx61X40sORqZq2jqf4m1NIY5d3GXoKjP2k1nOtbIHqzKeNQG0_LG8sho-Gz5n-O73Xk/exec'; // Replace with your Google Apps Script URL
             fetch(scriptURL, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    console.log('Success:', data.message);
-                } else {
-                    console.error('Error:', data.message);
-                }
-            })
+            .then(response => console.log('Success!', response))
             .catch(error => console.error('Error!', error.message));
         };
     </script>
