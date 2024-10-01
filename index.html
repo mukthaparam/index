@@ -152,7 +152,7 @@
         document.getElementById('startButton').onclick = function() {
             const username = usernameInput.value.trim();
             if (username) {
-                alert(`Welcome, ${username}!`); // Fixed template literal
+                alert(`Welcome, ${username}!`);
                 nameInputDiv.style.display = 'none';
                 displayQuestion();
             } else {
@@ -258,20 +258,13 @@
             formData.append('finalAnswer', userFinalAnswer);
 
             // Submit to Google Sheets
-            const scriptURL = 'YOUR_SCRIPT_URL'; // Replace with your Google Apps Script URL
+            const scriptURL = 'https://script.google.com/a/macros/rvce.edu.in/s/AKfycbzQgcJ8ukwpa-ciH7wdmZ20unMVThzXuHsaAF0jAgqCTgk8sCl6NhgbvT_PjTZxZLufAA/exec'; // Replace with your Google Apps Script URL
             fetch(scriptURL, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success!', data);
-                alert('Data submitted successfully!'); // Notify user of success
-            })
-            .catch(error => {
-                console.error('Error!', error.message);
-                alert('An error occurred while submitting your data.'); // Notify user of error
-            });
+            .then(response => console.log('Success!', response))
+            .catch(error => console.error('Error!', error.message));
         };
     </script>
 </body>
