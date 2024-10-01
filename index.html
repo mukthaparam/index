@@ -242,7 +242,7 @@
             formData.append('final_answer', userFinalAnswer);
 
             // Send data to Google Apps Script
-            fetch('https://docs.google.com/spreadsheets/d/1YDC6bxdGg7Bm8igvciW92fNkIG-YdM-odteof3pq0zY/edit?gid=0#gid=0', {
+            fetch('https://script.google.com/macros/s/AKfycby0QGnkvP9cbE0e_cJjOn2Dsy4dkvFHHDWjplAlIZpOiPXlkzyk76qpCImc9iBnDmc/exec', {
                 method: 'POST',
                 body: formData
             }).then(response => {
