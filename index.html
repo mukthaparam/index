@@ -37,13 +37,6 @@
             margin-bottom: 20px;
         }
 
-        .blurred {
-            filter: blur(10px);
-            transition: filter 0.5s;
-            display: block;
-            margin: 0 auto;
-        }
-
         #timer {
             font-size: 20px;
             color: red;
@@ -95,19 +88,10 @@
             font-size: 24px;
             font-weight: bold;
         }
-
-        .top-image {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: auto;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="https://raw.githubusercontent.com/mukthaparam/index/main/12.jpg" class="top-image" alt="Top Image">
         <h1>Quiz App</h1>
         <div id="nameInput">
             <input type="text" id="username" placeholder="Enter your name" required>
@@ -207,7 +191,6 @@
             if (selected === question.correct) {
                 score++;
                 feedbackDiv.innerText = "Correct!";
-                
                 switch (score) {
                     case 1:
                         revealImage.style.filter = "blur(7.5px)";
@@ -258,7 +241,7 @@
             formData.append('finalAnswer', userFinalAnswer);
 
             // Submit to Google Sheets
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbyD0Uy6JIbN8PF27bAxC9ntKex52LXQqVkwU0OeVEK_Axy3UVkNbrnSegz4Rdadj1F1/exec'; // Replace with your Google Apps Script Web App URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycby4ew2Hl3tCcSJJ-cDzMeqZyT7ZGQsA3m1LxH1llnDgbf0TdkH5ecHGE48japQDdaGt/exec'; // Replace with your Google Apps Script Web App URL
             fetch(scriptURL, {
                 method: 'POST',
                 body: formData
